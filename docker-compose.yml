@@ -28,11 +28,14 @@ services:
       traefik.http.routers.nginx2.rule: Path(`/`)
       traefik.port: 80
 
-  tests:
-    image: vtcs2304s19/blabber-api-tests
-    environment:
-      SERVICE_NAME: api
-      API_PORT: "5000"
+  mongo:
+    image: mongo
+
+  # tests:
+  #   image: vtcs2304s19/blabber-api-tests
+  #   environment:
+  #     SERVICE_NAME: api
+  #     API_PORT: "5000"
 
   proxy:
     image: traefik:v2.1
