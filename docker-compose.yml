@@ -9,33 +9,39 @@ services:
     ports:
       - 5000:5000
     environment:
+      DEBUG_METRICS: "true"
       FLASK_ENV: development
     labels:
       traefik.enable: true
-      traefik.http.routers.nginx1.rule: PathPrefix(`/api`)
-      traefik.port: 3000
+      traefik.http.routers.flask.rule: PathPrefix(`/api`)
+      traefik.http.middlewares.strip-api.stripprefix.prefixes: /api
+      traefik.http.services.flask.loadbalancer.server.port: 5000
+      traefik.http.routers.flak.middlewares: strip-api@docker
 
   app:
     image: vtcs2304s19/blabber-client
-    # working_dir: /app
-    # volumes:
-    #   - ./:/app
-    # ports:
-    #   - 3000:3000
-    # environment:
-    #   FLASK_ENV: development
     labels:
-      traefik.http.routers.nginx2.rule: Path(`/`)
-      traefik.port: 80
+      traefik.http.routers.react.rule: PathPrefix(`/`)
+      traefik.http.services.react.loadbalancer.server.port: 80
 
   mongo:
     image: mongo
+    volumes:
+      - mongo-data:/data/db
 
-  # tests:
-  #   image: vtcs2304s19/blabber-api-tests
-  #   environment:
-  #     SERVICE_NAME: api
-  #     API_PORT: "5000"
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    ports:
+      - 3000:3000
 
   proxy:
     image: traefik:v2.1
@@ -45,3 +51,7 @@ services:
       - 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  mongo-data:
+  grafana-storage:
