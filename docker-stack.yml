@@ -1,0 +1,61 @@
+version: "3.7"
+
+services:
+  api:
+    image: hsn1017/python-app
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - 5000:5000
+    environment:
+      DEBUG_METRICS: "true"
+      FLASK_ENV: development
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.flask.rule: PathPrefix(`/api`)
+      traefik.http.middlewares.strip-api.stripprefix.prefixes: /api
+      traefik.http.services.flask.loadbalancer.server.port: 5000
+      traefik.http.routers.flak.middlewares: strip-api@docker
+    deploy:
+      replicas: 2
+      placement:
+        constraints:
+          - "node.role==worker"
+
+  app:
+    image: vtcs2304s19/blabber-client
+    labels:
+      traefik.http.routers.react.rule: PathPrefix(`/`)
+      traefik.http.services.react.loadbalancer.server.port: 80
+    deploy:
+      replicas: 2
+      placement:
+        constraints:
+          - "node.role==worker"
+  mongo:
+    image: mongo
+    volumes:
+      - mongo-data:/data/db
+    deploy:
+      placement:
+        constraints:
+          - "node.role==worker"
+
+  proxy:
+    image: traefik:v2.1
+    command:
+      - "--api.insecure=true --providers.docker"
+      - "--providers.docker.swarmMode=true"
+    ports:
+      - 80:80
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"
+
+volumes:
+  mongo-data:
