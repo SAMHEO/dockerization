@@ -41,6 +41,8 @@ services:
       placement:
         constraints:
           - "node.role==worker"
+    secrets:
+      - db_secret
 
   proxy:
     image: traefik:v2.1
@@ -56,6 +58,10 @@ services:
       placement:
         constraints:
           - "node.role==manager"
+
+secrets:
+  db_secret:
+    file: db_secret.json
 
 volumes:
   mongo-data:

@@ -26,8 +26,16 @@ services:
 
   mongo:
     image: mongo
+    environment:
+      HOSTNAME_FILE: /run/secrets/db_hostname
+      MONGO_INITDB_ROOT_USERNAME_FILE: /run/secrets/db_username
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/db_password
     volumes:
       - mongo-data:/data/db
+    secrets:
+      - db_hostname
+      - db_username
+      - db_password
 
   prometheus:
     image: prom/prometheus
@@ -51,6 +59,14 @@ services:
       - 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+secrets:
+  db_hostname:
+    file: db_hostname.txt
+  db_username:
+    file: db_username.txt
+  db_password:
+    file: db_password.txt
 
 volumes:
   mongo-data:
