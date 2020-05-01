@@ -12,7 +12,7 @@ by_path_counter = metrics.counter(
         labels={'path': lambda: request.path}
     )
 
-mongoClient = pymongo.MongoClient("mongodb://mongo:27017")
+mongoClient = pymongo.MongoClient("mongodb://root:password@mongo:27017")
 mongoCollection = mongoClient["cs2304"]["greetings"]
 
 @app.route('/')
@@ -36,7 +36,8 @@ def get_blabs():
         i["id"] = str(item["_id"])
         del i["_id"]
         items.append(i)
-    return jsonify(items)
+    # return jsonify(items), 200
+    return make_response(jsonify(items), 200)
 
 @app.route('/blabs', methods=['POST'])
 @by_path_counter
@@ -56,4 +57,4 @@ def post_blabs():
         "message" : message
     }
     response = mongoCollection.insert_one({ "blab": newBlab})
-    return jsonify({ "blab" : newBlab , "id" : str(response.inserted_id)}) 
+    return jsonify({ "blab" : newBlab , "id" : str(response.inserted_id)})

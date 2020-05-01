@@ -26,6 +26,7 @@ services:
 
   mongo:
     image: mongo
+    command: [--auth]
     environment:
       HOSTNAME_FILE: /run/secrets/db_hostname
       MONGO_INITDB_ROOT_USERNAME_FILE: /run/secrets/db_username
